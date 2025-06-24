@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>航空器信道分配仿真</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    h1, h2 { margin: 0; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    h1 { margin-bottom: 10px; }
+    .main-container { display: flex; gap: 20px; flex: 1; }
+    .left-column { flex: 3; display: flex; flex-direction: column; gap: 20px; }
+    .right-column { flex: 2; display: flex; flex-direction: column; gap: 20px; }
+    .panel { background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+    .aircraft-panel { flex: 1; }
+    #aircraft-list { list-style-type: none; padding: 0; margin: 0; }
+    #aircraft-list li { display: grid; grid-template-columns: 1fr 1fr 1fr 80px 120px; gap: 10px; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+    .state { font-weight: bold; padding: 4px 8px; border-radius: 4px; color: #fff; min-width: 100px; text-align: center; }
+    .state-IDLE { background-color: #767676; }
+    .state-SENSING { background-color: #007bff; }
+    .state-TRANSMITTING { background-color: #28a745; }
+    #channel-status { font-size: 1.2em; font-weight: bold; }
+    #channel-status.free { color: #28a745; }
+    #channel-status.busy { color: #dc3545; }
+    .message-box { background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 15px; margin-top: 15px; flex-grow: 1; font-family: "Courier New", Courier, monospace; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .stat-item { text-align: center; }
+    .stat-value { font-size: 2em; font-weight: bold; color: #007bff; }
+    .stat-label { font-size: 0.9em; color: #6c757d; }
+    #log-panel { flex: 1; }
+    #log-container { background-color: #333; color: #f0f0f0; font-family: "Courier New", monospace; font-size: 0.8em; padding: 10px; border-radius: 4px; overflow-y: scroll; flex-grow: 1; height: 100px; }
+    .state-SENSING { background-color: #007bff; }
+    .state-TRANSMITTING { background-color: #28a745; }
+    /* 添加这个新样式 */
+    .state-WAITING_FOR_ACK { background-color: #ffc107; color: #333; }
+    #channel-status { font-size: 1.2em; font-weight: bold; }
+  </style>
+
+</head>
+<body>
+<h1>ARCAS (CSMA) 仿真</h1>
+
+<div class="main-container">
+  <div class="left-column">
+    <div class="panel aircraft-panel">
+      <h2>航空器状态</h2>
+      <ul id="aircraft-list">
+        <li style="font-weight: bold;">
+          <span>呼号</span>
+          <span>飞行阶段</span>
+          <span>消息队列</span>
+          <span>成功率</span>
+          <span>信道状态</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="right-column">
+    <div class="panel">
+      <h2>全局统计</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div id="utilization-stat" class="stat-value">0.00%</div>
+          <div class="stat-label">频段使用率</div>
+        </div>
+        <div class="stat-item">
+          <div id="success-rate-stat" class="stat-value">100.00%</div>
+          <div class="stat-label">请求成功率</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>地面站 / 频段监控</h2>
+      <div>
+        <strong>频段状态:</strong>
+        <span id="channel-status" class="free">FREE</span>
+      </div>
+      <div class="message-box">
+        <strong>当前报文:</strong>
+        <pre id="message-log">等待接收...</pre>
+      </div>
+    </div>
+    <div class="panel" id="log-panel">
+      <h2>频段使用日志</h2>
+      <div id="log-container"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./renderer.js"></script>
+</body>
+</html>
